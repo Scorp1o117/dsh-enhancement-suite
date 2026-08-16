@@ -17,7 +17,8 @@ jobs:
       - name: Syntax-check the CLI
         run: node --check bin/dsh-enhance.mjs
       - name: Validate plugins.json
-        run: node -e "
+        run: |
+          node -e "
             const fs = require('fs');
             const m = JSON.parse(fs.readFileSync('plugins.json', 'utf8'));
             if (!Array.isArray(m.plugins) || m.plugins.length !== 4) {
@@ -39,7 +40,7 @@ jobs:
             }
             console.log('plugins.json OK: ' + names.join(', '));
           "
-      - name: Smoke-run CLI (list + doctor help)
+      - name: Smoke-run CLI (help + list)
         run: node bin/dsh-enhance.mjs --help && node bin/dsh-enhance.mjs list
 
   npm-check:
@@ -53,7 +54,8 @@ jobs:
         with:
           node-version: 22
       - name: Verify upstream packages resolve on npm
-        run: node -e "
+        run: |
+          node -e "
             const { execSync } = require('child_process');
             const fs = require('fs');
             const m = JSON.parse(fs.readFileSync('plugins.json', 'utf8'));
