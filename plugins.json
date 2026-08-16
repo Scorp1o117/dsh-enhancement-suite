@@ -1,0 +1,47 @@
+{
+  "suite": "dsh-enhancement-suite",
+  "node": ">=22.18",
+  "defaultProfile": "web",
+  "plugins": [
+    {
+      "key": "vision",
+      "name": "dsh-tool-vision",
+      "displayName": "dsh-tool-vision",
+      "emoji": "👁️",
+      "category": "Vision",
+      "repo": "https://github.com/Scorp1o117/dsh-tool-vision",
+      "description": "给文本模型增加视觉能力和图片桥接。",
+      "descriptionEn": "Adds vision capability and image bridging to text-only models."
+    },
+    {
+      "key": "soul",
+      "name": "dsh-soul-md",
+      "displayName": "dsh-soul-md",
+      "emoji": "🎭",
+      "category": "Persona",
+      "repo": "https://github.com/Scorp1o117/dsh-soul-md",
+      "description": "为 Agent 增加 soul.md 人设、会话/工作区 Persona 和可演化人格。",
+      "descriptionEn": "soul.md personas, session/workspace persona switching, and an evolving personality with long-term memory."
+    },
+    {
+      "key": "memory",
+      "name": "dsh-tdai-memory",
+      "displayName": "dsh-tdai-memory",
+      "emoji": "🧠",
+      "category": "Memory",
+      "repo": "https://github.com/Scorp1o117/dsh-tdai-memory",
+      "description": "完整的长期分层记忆、召回与搜索。",
+      "descriptionEn": "Full long-term layered memory (L0-L3), recall and search."
+    },
+    {
+      "key": "marketplace",
+      "name": "dsh-plugin-marketplace",
+      "displayName": "dsh-plugin-marketplace",
+      "emoji": "🛒",
+      "category": "Marketplace",
+      "repo": "https://github.com/Scorp1o117/dsh-plugin-marketplace",
+      "description": "直接在 DSH Web UI 中发现和浏览插件。",
+      "descriptionEn": "Discover and browse plugins directly inside the DSH Web UI."
+    }
+  ]
+}
