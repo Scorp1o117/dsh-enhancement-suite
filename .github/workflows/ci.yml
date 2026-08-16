@@ -10,36 +10,14 @@ jobs:
     name: CLI syntax + manifest validation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
       - name: Syntax-check the CLI
         run: node --check bin/dsh-enhance.mjs
-      - name: Validate plugins.json
-        run: |
-          node -e "
-            const fs = require('fs');
-            const m = JSON.parse(fs.readFileSync('plugins.json', 'utf8'));
-            if (!Array.isArray(m.plugins) || m.plugins.length !== 4) {
-              throw new Error('expected exactly 4 plugins, got ' + (m.plugins || []).length);
-            }
-            const names = m.plugins.map((p) => p.name);
-            const keys = m.plugins.map((p) => p.key);
-            if (new Set(names).size !== names.length) throw new Error('duplicate plugin names');
-            if (new Set(keys).size !== keys.length) throw new Error('duplicate plugin keys');
-            for (const p of m.plugins) {
-              for (const field of ['key', 'name', 'displayName', 'emoji', 'category', 'repo', 'description', 'descriptionEn']) {
-                if (typeof p[field] !== 'string' || p[field].length === 0) {
-                  throw new Error(p.name + ': missing required field ' + field);
-                }
-              }
-              if (!/^https:\/\/github\.com\//.test(p.repo)) {
-                throw new Error(p.name + ': repo must be an https github.com URL');
-              }
-            }
-            console.log('plugins.json OK: ' + names.join(', '));
-          "
+      - name: Validate plugins.json (shared script)
+        run: node bin/validate-manifest.mjs
       - name: Smoke-run CLI (help + list)
         run: node bin/dsh-enhance.mjs --help && node bin/dsh-enhance.mjs list
 
@@ -49,8 +27,8 @@ jobs:
     # Network hiccups must never fail CI — this job is advisory only.
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
       - name: Verify upstream packages resolve on npm

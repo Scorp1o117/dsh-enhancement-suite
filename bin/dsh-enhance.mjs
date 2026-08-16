@@ -368,40 +368,50 @@ async function cmdUpdate(profile, only, dryRun) {
 }
 
 function cmdDoctor(profile) {
+  let healthy = true;
   head("DeepSeek Harness Enhancement Suite — doctor");
   const nodeOk = versionGte(process.versions.node, NODE_MIN.replace(/^>=\s*/, ""));
   if (nodeOk) ok(`Node ${process.versions.node} (>= ${NODE_MIN.replace(/^>=\s*/, "")})`);
   else {
     bad(`Node ${process.versions.node} — this suite requires ${NODE_MIN} (dsh-tdai-memory constraint)`);
-    process.exitCode = 1;
+    healthy = false;
   }
   const dsh = findDsh();
   if (dsh) {
     ok(`dsh CLI found: ${dsh}`);
   } else {
     bad("dsh CLI not found on PATH — install DeepSeek Harness first");
-    process.exitCode = 1;
+    healthy = false;
   }
   const pdir = profileDir(profile);
   if (existsSync(pdir)) ok(`profile "${profile}" exists: ${pdir}`);
   else {
     bad(`profile "${profile}" not found at ${pdir} — create it with "dsh plugin --profile ${profile} add <package>"`);
-    process.exitCode = 1;
+    healthy = false;
   }
   head("");
   for (const p of PLUGINS) {
     const version = installedVersion(p.name, profile);
     if (!version) {
       bad(`${p.emoji} ${p.name}: not installed`);
+      healthy = false;
       continue;
     }
     ok(`${p.emoji} ${p.name}: installed (${version})`);
     const mounted = isInProfileBundles(p.name, profile) || isMountedInPatch(p.name, profile) || isBundlePackage(p.name, profile);
     if (mounted) info(`   mounted: ${isInProfileBundles(p.name, profile) ? "dsh.profile.bundles" : isMountedInPatch(p.name, profile) ? "cordis.patch.yml" : "own dsh.bundle layer"}`);
-    else bad(`   not mounted — run "dsh-enhance install"`);
+    else {
+      bad(`   not mounted — run "dsh-enhance install"`);
+      healthy = false;
+    }
   }
   head("");
-  console.log("Doctor finished. No API keys are read or printed.");
+  if (healthy) {
+    console.log("Doctor finished: all checks passed. No API keys are read or printed.");
+  } else {
+    console.log("Doctor finished with failures — fix the reported items, then re-run.");
+    process.exitCode = 1;
+  }
 }
 
 // ── entry ───────────────────────────────────────────────────────────────────
