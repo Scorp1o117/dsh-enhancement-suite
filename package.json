@@ -1,6 +1,6 @@
 {
   "name": "dsh-enhancement-suite",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Enhancement suite for DeepSeek Harness — the official installer and registry for Scorp1o117's Vision, Soul/Persona, Memory & Marketplace plugins.",
   "type": "module",
   "license": "MIT",

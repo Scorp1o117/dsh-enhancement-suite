@@ -84,18 +84,30 @@ function findDsh() {
   return null;
 }
 
+/** Quote one argument for a Windows cmd line (no shell interpolation). */
+function quoteArg(arg) {
+  return '"' + String(arg).replace(/"/g, '\\"') + '"';
+}
+
 /**
  * Spawn one subprocess with an argument array (never a shell string).
- * On Windows the resolved .cmd shim is executed through the shell with
- * per-argument quoting applied by Node, which keeps every argument opaque.
+ * On Windows a .cmd shim (dsh.cmd / pnpm.cmd) is executed through the
+ * shell; the command line is built here with per-argument quoting, so
+ * Node's `args + shell:true` deprecation (DEP0190) is not triggered.
  */
-function run(bin, args, { capture = false } = {}) {
+function run(bin, args, { capture = false, cwd } = {}) {
   return new Promise((resolve) => {
-    const child = spawn(bin, args, {
-      shell: process.platform === "win32",
+    const opts = {
       stdio: capture ? ["ignore", "pipe", "pipe"] : "inherit",
       windowsHide: true,
-    });
+      ...(cwd ? { cwd } : {}),
+    };
+    let child;
+    if (process.platform === "win32") {
+      child = spawn([bin, ...args].map(quoteArg).join(" "), { ...opts, shell: true });
+    } else {
+      child = spawn(bin, args, opts);
+    }
     let stdout = "";
     let stderr = "";
     if (capture) {
@@ -125,6 +137,88 @@ function versionGte(current, minimum) {
 
 function installedVersion(pkg, profile) {
   return installedManifest(pkg, profile)?.version ?? null;
+}
+
+const dryRunMode = () => process.env.DSH_ENHANCE_DRY_RUN === "1";
+
+/** Locate pnpm on PATH (pnpm.cmd / pnpm.exe / pnpm). */
+function findPnpm() {
+  const names = process.platform === "win32" ? ["pnpm.cmd", "pnpm.exe", "pnpm"] : ["pnpm"];
+  const entries = (process.env.PATH ?? "").split(process.platform === "win32" ? ";" : ":").filter(Boolean);
+  for (const dir of entries) {
+    for (const name of names) {
+      const candidate = join(dir, name);
+      if (existsSync(candidate)) return candidate;
+    }
+  }
+  return null;
+}
+
+/** Latest published version of a package from the npm registry (no auth). */
+async function latestVersion(pkg) {
+  try {
+    const res = await fetch(`https://registry.npmjs.org/${encodeURIComponent(pkg)}`, {
+      headers: { Accept: "application/vnd.npm.install-v1+json" },
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return (data && data["dist-tags"] && data["dist-tags"].latest) || null;
+  } catch {
+    return null;
+  }
+}
+
+function profileJson(profile) {
+  try {
+    return JSON.parse(readFileSync(join(profileDir(profile), "package.json"), "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Set dependencies[pkg] to `^version` in the profile manifest so pnpm
+ * resolves the freshly published version (plain `pnpm update` keeps the
+ * lockfile resolution when the old version still satisfies the range).
+ * Returns true when the manifest would be / was changed.
+ */
+function bumpProfileRange(profile, pkg, version) {
+  const json = profileJson(profile);
+  if (!json || !json.dependencies || typeof json.dependencies[pkg] !== "string") return false;
+  const want = `^${version}`;
+  if (json.dependencies[pkg] === want) return false;
+  if (dryRunMode()) return true;
+  json.dependencies[pkg] = want;
+  writeFileSync(join(profileDir(profile), "package.json"), JSON.stringify(json, null, 2) + "\n", "utf8");
+  return true;
+}
+
+/**
+ * Make sure `${pkg}@${version}` appears in pnpm-workspace.yaml's
+ * minimumReleaseAgeExclude (pnpm 11 blocks freshly published packages until
+ * they reach a minimum release age). Returns true when the file changed.
+ */
+function ensureReleaseAgeExclude(profile, pkg, version) {
+  const patch = join(profileDir(profile), "pnpm-workspace.yaml");
+  if (!existsSync(patch)) return false;
+  const entry = `${pkg}@${version}`;
+  const src = readFileSync(patch, "utf8");
+  if (src.includes(entry)) return false;
+  if (dryRunMode()) return true;
+  const lines = src.split("\n");
+  const idx = lines.findIndex((l) => l.trim() === "minimumReleaseAgeExclude:");
+  let next;
+  if (idx >= 0) {
+    let insertAt = idx + 1;
+    while (insertAt < lines.length && /^[ \t]+- /.test(lines[insertAt])) insertAt += 1;
+    lines.splice(insertAt, 0, `  - ${entry}`);
+    next = lines.join("\n");
+  } else {
+    next = src.replace(/\s*$/, "") + `\nminimumReleaseAgeExclude:\n  - ${entry}\n`;
+  }
+  writeFileSync(patch, next, "utf8");
+  return true;
 }
 
 /** Bundle plugins are auto-mounted by their own dsh.bundle layer. */
@@ -313,10 +407,21 @@ async function cmdInstall(profile, only, dryRun) {
   const failures = [];
   for (const p of plugins) {
     info(`${p.emoji} ${p.name}`);
+    const latest = await latestVersion(p.name);
+    const installed = installedVersion(p.name, profile);
     const addArgs = ["plugin", "--profile", profile, "add", p.name];
     if (dryRun) {
+      ok(`npm latest: ${latest ?? "unknown (network?)"}; installed: ${installed ?? "not installed"}`);
+      if (latest && installed && installed !== latest) {
+        ok(`would bump range to ^${latest} (pnpm keeps stale lockfile versions otherwise)`);
+        ok(`would ensure minimumReleaseAgeExclude entry for ${p.name}@${latest}`);
+      }
       ok(`would run: dsh ${addArgs.join(" ")}`);
     } else {
+      if (latest && installed && installed !== latest) {
+        if (bumpProfileRange(profile, p.name, latest)) info(`range align: ^${installed} → ^${latest}`);
+        ensureReleaseAgeExclude(profile, p.name, latest);
+      }
       const result = await run(dsh, addArgs);
       if (result.code !== 0) {
         const tail = (result.stderr || result.stdout || "").trim().split("\n").slice(-3).join(" ");
@@ -325,6 +430,25 @@ async function cmdInstall(profile, only, dryRun) {
         continue;
       }
       ok(`installed via dsh plugin add`);
+      const after = installedVersion(p.name, profile);
+      if (latest && after !== latest) {
+        const pnpm = findPnpm();
+        if (!pnpm) {
+          bad(`${p.name}: still at ${after ?? "?"}, npm latest ${latest} — install pnpm and re-run`);
+          failures.push(`${p.name}: version mismatch (${after ?? "?"} ≠ ${latest})`);
+          continue;
+        }
+        info(`installed ${after ?? "?"} ≠ latest ${latest} — running pnpm install as fallback`);
+        const pr = await run(pnpm, ["install"], { capture: true, cwd: profileDir(profile) });
+        const final = installedVersion(p.name, profile);
+        if (pr.code !== 0 || final !== latest) {
+          const tail = (pr.stderr || pr.stdout || "").trim().split("\n").slice(-3).join(" ");
+          bad(`${p.name}: still at ${final ?? "?"}, npm latest ${latest} (pnpm exit ${pr.code}): ${tail || "no output"}`);
+          failures.push(`${p.name}: version mismatch (${final ?? "?"} ≠ ${latest})`);
+          continue;
+        }
+        ok(`pnpm install fallback: ${final}`);
+      }
     }
     const mount = ensureMounted(p.name, profile);
     if (dryRun) {
@@ -365,21 +489,52 @@ async function cmdUpdate(profile, only, dryRun) {
       info(`${p.emoji} ${p.name}: not installed — run "dsh-enhance install" first`);
       continue;
     }
+    const installed = installedVersion(p.name, profile);
+    info(`${p.emoji} ${p.name} (installed ${installed})`);
+    const latest = await latestVersion(p.name);
     const args = ["plugin", "--profile", profile, "update", p.name];
     if (dryRun) {
+      ok(`npm latest: ${latest ?? "unknown (network?)"}`);
+      if (latest && installed && installed !== latest) {
+        ok(`would bump range to ^${latest} (pnpm keeps stale lockfile versions otherwise)`);
+        ok(`would ensure minimumReleaseAgeExclude entry for ${p.name}@${latest}`);
+      }
       ok(`would run: dsh ${args.join(" ")}`);
-    } else {
-      const result = await run(dsh, args);
-      if (result.code !== 0) {
-        const tail = (result.stderr || result.stdout || "").trim().split("\n").slice(-3).join(" ");
-        bad(`${p.name} update failed (${result.code}): ${tail || result.error?.message || "unknown error"}`);
-        failures.push(`${p.name}: dsh plugin update exited ${result.code}`);
+      continue;
+    }
+    if (latest && installed && installed !== latest) {
+      if (bumpProfileRange(profile, p.name, latest)) info(`range align: ^${installed} → ^${latest}`);
+      ensureReleaseAgeExclude(profile, p.name, latest);
+    }
+    const result = await run(dsh, args);
+    if (result.code !== 0) {
+      const tail = (result.stderr || result.stdout || "").trim().split("\n").slice(-3).join(" ");
+      bad(`${p.name} update failed (${result.code}): ${tail || result.error?.message || "unknown error"}`);
+      failures.push(`${p.name}: dsh plugin update exited ${result.code}`);
+      continue;
+    }
+    let after = installedVersion(p.name, profile);
+    ok(`updated: ${after ?? "latest"}`);
+    if (latest && after !== latest) {
+      const pnpm = findPnpm();
+      if (!pnpm) {
+        bad(`${p.name}: still at ${after ?? "?"}, npm latest ${latest} — install pnpm and re-run`);
+        failures.push(`${p.name}: version mismatch (${after ?? "?"} ≠ ${latest})`);
         continue;
       }
-      ok(`updated: ${p.name} → ${installedVersion(p.name, profile) ?? "latest"}`);
+      info(`installed ${after ?? "?"} ≠ latest ${latest} — running pnpm install as fallback`);
+      const pr = await run(pnpm, ["install"], { capture: true, cwd: profileDir(profile) });
+      after = installedVersion(p.name, profile);
+      if (pr.code !== 0 || after !== latest) {
+        const tail = (pr.stderr || pr.stdout || "").trim().split("\n").slice(-3).join(" ");
+        bad(`${p.name}: still at ${after ?? "?"}, npm latest ${latest} (pnpm exit ${pr.code}): ${tail || "no output"}`);
+        failures.push(`${p.name}: version mismatch (${after ?? "?"} ≠ ${latest})`);
+        continue;
+      }
+      ok(`pnpm install fallback: ${after}`);
     }
     const mount = ensureMounted(p.name, profile);
-    if (!dryRun && mount.changed) ok(mount.note);
+    if (mount.changed) ok(mount.note);
   }
   head("");
   if (failures.length > 0) {
