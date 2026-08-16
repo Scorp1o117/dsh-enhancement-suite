@@ -151,13 +151,36 @@ function isMountedInPatch(pkg, profile) {
  * Mirrors the marketplace's own logic: bundle plugins are skipped (their
  * bundle layer auto-mounts them), an empty `[]` patch is replaced with a
  * block-style insert list, and a non-empty flow-style array is refused
- * rather than corrupted.
+ * rather than corrupted. For bundle plugins, any STALE manual row left by an
+ * earlier non-bundle version is removed — two mounts of the same entry id
+ * abort boot.
  */
+function escapeRegExp(text) {
+  return String(text).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/** Remove a `- id: ...` + `name: '<pkg>'` manual mount block, if present. */
+function stripManualRow(src, pkg) {
+  const pattern = new RegExp(`[ \\t]*- id: [^\\n]*\\n[ \\t]*name: ['"]${escapeRegExp(pkg)}['"]\\n?`, "g");
+  return src.replace(pattern, "");
+}
+
 function ensureMounted(pkg, profile) {
   const patch = join(profileDir(profile), "cordis.patch.yml");
   if (!existsSync(patch)) return { changed: false, note: "cordis.patch.yml not found; mount manually" };
-  if (isInProfileBundles(pkg, profile)) return { changed: false, note: "already mounted via dsh.profile.bundles" };
-  if (isBundlePackage(pkg, profile)) return { changed: false, note: "bundle plugin: auto-mounted via its own dsh.bundle layer" };
+  const inBundles = isInProfileBundles(pkg, profile);
+  if (inBundles || isBundlePackage(pkg, profile)) {
+    // The bundle layer auto-mounts this plugin. Remove a stale manual row
+    // (written before the package gained its dsh.bundle manifest) so boot
+    // does not fail with a duplicate loader entry.
+    let src = readFileSync(patch, "utf8");
+    const cleaned = stripManualRow(src, pkg);
+    if (cleaned !== src) {
+      if (process.env.DSH_ENHANCE_DRY_RUN !== "1") writeFileSync(patch, cleaned, "utf8");
+      return { changed: true, note: "removed stale manual mount row (bundle layer auto-mounts)" };
+    }
+    return { changed: false, note: inBundles ? "already mounted via dsh.profile.bundles" : "bundle plugin: auto-mounted via its own dsh.bundle layer" };
+  }
   let src = readFileSync(patch, "utf8");
   if (src.includes(`name: '${pkg}'`) || src.includes(`name: "${pkg}"`)) return { changed: false, note: "already mounted in cordis.patch.yml" };
   const id = pkg.replace(/^@[^/]+\//, "").replace(/[^a-z0-9-]/g, "-") || pkg;
@@ -398,9 +421,14 @@ function cmdDoctor(profile) {
       continue;
     }
     ok(`${p.emoji} ${p.name}: installed (${version})`);
-    const mounted = isInProfileBundles(p.name, profile) || isMountedInPatch(p.name, profile) || isBundlePackage(p.name, profile);
-    if (mounted) info(`   mounted: ${isInProfileBundles(p.name, profile) ? "dsh.profile.bundles" : isMountedInPatch(p.name, profile) ? "cordis.patch.yml" : "own dsh.bundle layer"}`);
-    else {
+    const inBundles = isInProfileBundles(p.name, profile);
+    const inPatch = isMountedInPatch(p.name, profile);
+    if (inBundles && inPatch) {
+      bad(`   duplicate mount: manual row in cordis.patch.yml AND dsh.profile.bundles — run "dsh-enhance install" to clean up`);
+      healthy = false;
+    } else if (inBundles || inPatch || isBundlePackage(p.name, profile)) {
+      info(`   mounted: ${inBundles ? "dsh.profile.bundles" : inPatch ? "cordis.patch.yml" : "own dsh.bundle layer"}`);
+    } else {
       bad(`   not mounted — run "dsh-enhance install"`);
       healthy = false;
     }

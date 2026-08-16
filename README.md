@@ -94,8 +94,8 @@ dsh-enhance update --profile headless
 ## How it installs
 
 1. Every plugin is installed through the **official CLI**: `dsh plugin --profile <profile> add <package>`. This suite never loads the plugins through its own dependency graph or its own cordis patch — the four upstream packages stay independent in the profile.
-2. `dsh-plugin-marketplace` declares `dsh.bundle.patch`, so `dsh plugin add` reconciles it into `dsh.profile.bundles` and its bundle layer auto-mounts it.
-3. The other three are plain dependencies; the suite appends their mount rows to the profile's `cordis.patch.yml` with the same safe, idempotent logic the marketplace's own one-click install uses (an empty `[]` patch is replaced correctly, duplicates are skipped, and a flow-style array is refused instead of corrupted).
+2. All four plugins now declare `dsh.bundle.patch` (as of vision 0.3.9 / soul-md 0.5.4 / tdai-memory 0.2.9 / marketplace 0.2.4), so `dsh plugin add` reconciles each into `dsh.profile.bundles` and its own bundle layer auto-mounts it.
+3. For profiles that mounted a plugin manually before it gained its bundle manifest, the suite **removes the stale manual row** from `cordis.patch.yml` — two mounts of the same entry id would abort boot. (Non-bundle third-party plugins still get the safe idempotent mount logic: empty `[]` patches are replaced correctly, duplicates are skipped, flow-style arrays are refused instead of corrupted.)
 4. Restart `dsh web` and the plugins load.
 
 Every step reports a clear `✓` / `✗`, failures are never swallowed, and no API key is read, printed, or forwarded.
