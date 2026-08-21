@@ -35,6 +35,7 @@ const DEFAULT_PROFILE = MANIFEST.defaultProfile ?? "web";
 /** Short keys and full package names are both accepted for --only. */
 const KEY_ALIASES = new Map(PLUGINS.map((p) => [p.key, p.name]));
 const NODE_MIN = MANIFEST.node ?? ">=22.18";
+const DSH_MIN = MANIFEST.dsh ?? ">=0.1.0-rc.7";
 
 const ok = (msg) => console.log(`  ✓ ${msg}`);
 const bad = (msg) => console.log(`  ✗ ${msg}`);
@@ -383,6 +384,7 @@ Examples:
 
 Notes:
   - Install prefers the official CLI: dsh plugin --profile <profile> add <package>
+  - Requires DSH ${DSH_MIN}; rc.6 users must install the pinned legacy releases documented in the README
   - Requires Node ${NODE_MIN} (dsh-tdai-memory constraint)
   - This suite never loads plugins through its own dependency graph`);
 }
@@ -401,6 +403,7 @@ function cmdList(profile) {
   }
   head("");
   console.log(`Node requirement: ${NODE_MIN} (running ${process.version})`);
+  console.log(`DSH requirement: ${DSH_MIN}`);
 }
 
 async function cmdInstall(profile, only, dryRun) {

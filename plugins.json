@@ -1,7 +1,14 @@
 {
   "suite": "dsh-enhancement-suite",
   "node": ">=22.18",
+  "dsh": ">=0.1.0-rc.7",
   "defaultProfile": "web",
+  "rc6Pins": {
+    "dsh-tool-vision": "0.6.1",
+    "dsh-soul-md": "0.5.6",
+    "dsh-tdai-memory": "0.2.11",
+    "dsh-plugin-marketplace": "0.2.6"
+  },
   "plugins": [
     {
       "key": "vision",

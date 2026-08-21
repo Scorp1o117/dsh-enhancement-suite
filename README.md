@@ -6,7 +6,15 @@
 
 The official entry point and one-command installer for the four Scorp1o117 plugins that enhance [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (DSH). This suite is a real installer — not a link collection: it drives the official `dsh plugin` CLI, mounts what needs mounting, and checks the result.
 
-Version 0.1.3 is validated with DSH `0.1.1-rc.1` and reports pnpm native-build policy failures explicitly.
+Version 0.1.4 and newer require DSH `0.1.0-rc.7` or newer and are validated
+with `0.1.0-rc.7`, `0.1.0-rc.8`, and `0.1.1-rc.1`. They also report pnpm
+native-build policy failures explicitly.
+
+DSH `0.1.0-rc.6` users must install the last compatible plugin releases
+directly: `dsh-tool-vision@0.6.1`, `dsh-soul-md@0.5.6`,
+`dsh-tdai-memory@0.2.11`, and `dsh-plugin-marketplace@0.2.6`. Do not use the
+suite's unpinned `install` command on rc.6 because it intentionally resolves
+the current releases.
 
 > **This repository does not vendor or replace the individual plugins.**
 > **Each plugin remains independently maintained in its own upstream repository.**
