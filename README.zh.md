@@ -6,6 +6,8 @@
 
 四个 Scorp1o117 插件的官方总入口和一键安装套件，为 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（DSH）增强能力。这是一个真正可用的一键安装器，而不是链接合集：它驱动官方 `dsh plugin` CLI、自动处理挂载、并检查结果。
 
+0.1.3 已针对 DSH `0.1.1-rc.1` 验证，并会明确识别 pnpm 原生依赖构建策略导致的安装失败。
+
 > **本仓库不复制、不替代任何独立插件。**
 > **每个插件都在各自的 upstream 仓库独立维护。**
 

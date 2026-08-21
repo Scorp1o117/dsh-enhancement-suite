@@ -6,6 +6,8 @@
 
 The official entry point and one-command installer for the four Scorp1o117 plugins that enhance [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (DSH). This suite is a real installer — not a link collection: it drives the official `dsh plugin` CLI, mounts what needs mounting, and checks the result.
 
+Version 0.1.3 is validated with DSH `0.1.1-rc.1` and reports pnpm native-build policy failures explicitly.
+
 > **This repository does not vendor or replace the individual plugins.**
 > **Each plugin remains independently maintained in its own upstream repository.**
 

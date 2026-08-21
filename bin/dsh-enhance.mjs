@@ -119,6 +119,14 @@ function run(bin, args, { capture = false, cwd } = {}) {
   });
 }
 
+function failureSummary(result) {
+  const output = (result.stderr || result.stdout || "").trim();
+  if (output.includes("ERR_PNPM_IGNORED_BUILDS")) {
+    return "dependency build scripts were blocked by pnpm; update the plugin or make its native dependency opt-in";
+  }
+  return output.split("\n").slice(-3).join(" ") || result.error?.message || "unknown error";
+}
+
 /** Minimal semver compare (numeric dotted triples), enough for the Node gate. */
 function parseVersion(v) {
   const m = /^(\d+)\.(\d+)(?:\.(\d+))?/.exec(String(v).trim());
@@ -422,10 +430,9 @@ async function cmdInstall(profile, only, dryRun) {
         if (bumpProfileRange(profile, p.name, latest)) info(`range align: ^${installed} → ^${latest}`);
         ensureReleaseAgeExclude(profile, p.name, latest);
       }
-      const result = await run(dsh, addArgs);
+      const result = await run(dsh, addArgs, { capture: true });
       if (result.code !== 0) {
-        const tail = (result.stderr || result.stdout || "").trim().split("\n").slice(-3).join(" ");
-        bad(`${p.name} install failed (${result.code}): ${tail || result.error?.message || "unknown error"}`);
+        bad(`${p.name} install failed (${result.code}): ${failureSummary(result)}`);
         failures.push(`${p.name}: dsh plugin add exited ${result.code}`);
         continue;
       }
@@ -442,8 +449,7 @@ async function cmdInstall(profile, only, dryRun) {
         const pr = await run(pnpm, ["install"], { capture: true, cwd: profileDir(profile) });
         const final = installedVersion(p.name, profile);
         if (pr.code !== 0 || final !== latest) {
-          const tail = (pr.stderr || pr.stdout || "").trim().split("\n").slice(-3).join(" ");
-          bad(`${p.name}: still at ${final ?? "?"}, npm latest ${latest} (pnpm exit ${pr.code}): ${tail || "no output"}`);
+          bad(`${p.name}: still at ${final ?? "?"}, npm latest ${latest} (pnpm exit ${pr.code}): ${failureSummary(pr)}`);
           failures.push(`${p.name}: version mismatch (${final ?? "?"} ≠ ${latest})`);
           continue;
         }
@@ -506,10 +512,9 @@ async function cmdUpdate(profile, only, dryRun) {
       if (bumpProfileRange(profile, p.name, latest)) info(`range align: ^${installed} → ^${latest}`);
       ensureReleaseAgeExclude(profile, p.name, latest);
     }
-    const result = await run(dsh, args);
+    const result = await run(dsh, args, { capture: true });
     if (result.code !== 0) {
-      const tail = (result.stderr || result.stdout || "").trim().split("\n").slice(-3).join(" ");
-      bad(`${p.name} update failed (${result.code}): ${tail || result.error?.message || "unknown error"}`);
+      bad(`${p.name} update failed (${result.code}): ${failureSummary(result)}`);
       failures.push(`${p.name}: dsh plugin update exited ${result.code}`);
       continue;
     }
@@ -526,8 +531,7 @@ async function cmdUpdate(profile, only, dryRun) {
       const pr = await run(pnpm, ["install"], { capture: true, cwd: profileDir(profile) });
       after = installedVersion(p.name, profile);
       if (pr.code !== 0 || after !== latest) {
-        const tail = (pr.stderr || pr.stdout || "").trim().split("\n").slice(-3).join(" ");
-        bad(`${p.name}: still at ${after ?? "?"}, npm latest ${latest} (pnpm exit ${pr.code}): ${tail || "no output"}`);
+        bad(`${p.name}: still at ${after ?? "?"}, npm latest ${latest} (pnpm exit ${pr.code}): ${failureSummary(pr)}`);
         failures.push(`${p.name}: version mismatch (${after ?? "?"} ≠ ${latest})`);
         continue;
       }
