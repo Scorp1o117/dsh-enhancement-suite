@@ -2,7 +2,7 @@
 /**
  * validate-manifest — validates plugins.json for the suite.
  *
- * Checks: exactly four plugins, no duplicate names/keys, all required
+ * Checks: at least one plugin, no duplicate names/keys, all required
  * fields present, repo URLs are https github.com links. Exits non-zero on
  * any violation. Used by CI and `npm run check`.
  */
@@ -24,7 +24,7 @@ if (manifest.dsh !== ">=0.1.0-rc.7") fail(`expected dsh requirement >=0.1.0-rc.7
 if (!Array.isArray(manifest.plugins)) {
   fail("plugins.json: missing plugins array");
 } else {
-  if (manifest.plugins.length !== 4) fail(`expected exactly 4 plugins, got ${manifest.plugins.length}`);
+  if (manifest.plugins.length < 1) fail("plugins.json: plugins array is empty");
   const names = manifest.plugins.map((p) => p.name);
   const keys = manifest.plugins.map((p) => p.key);
   if (new Set(names).size !== names.length) fail("duplicate plugin names");

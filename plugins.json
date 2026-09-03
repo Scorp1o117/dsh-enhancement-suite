@@ -49,6 +49,16 @@
       "repo": "https://github.com/Scorp1o117/dsh-plugin-marketplace",
       "description": "直接在 DSH Web UI 中发现和浏览插件。",
       "descriptionEn": "Discover and browse plugins directly inside the DSH Web UI."
+    },
+    {
+      "key": "reasoning",
+      "name": "dsh-reasoning-options",
+      "displayName": "dsh-reasoning-options",
+      "emoji": "🎚️",
+      "category": "Model",
+      "repo": "https://github.com/Scorp1o117/dsh-reasoning-options",
+      "description": "为所有第三方（pi-ai）模型自动添加推理强度选项（off→max 七档，默认 high）。",
+      "descriptionEn": "Auto-adds reasoning-effort levels (off→max, default high) to every pi-ai third-party model."
     }
   ]
 }

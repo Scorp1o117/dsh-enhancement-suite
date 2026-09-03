@@ -3,12 +3,13 @@
  * dsh-enhance — DeepSeek Harness Enhancement Suite CLI.
  *
  * Zero-dependency, cross-platform (Windows / Linux / macOS) installer and
- * registry for the four Scorp1o117 DSH plugins:
+ * registry for the Scorp1o117 DSH plugins (see plugins.json):
  *
  *   vision      dsh-tool-vision          Vision
  *   soul        dsh-soul-md              Persona
  *   memory      dsh-tdai-memory          Memory
  *   marketplace dsh-plugin-marketplace   Marketplace
+ *   reasoning   dsh-reasoning-options    Model
  *
  * Install always prefers the official DeepSeek Harness plugin CLI
  * (`dsh plugin --profile <profile> add <package>`); this suite never loads
@@ -365,7 +366,7 @@ Usage:
 
 Commands:
   list                          Show the plugin registry (installed state per profile)
-  install                       Install all four plugins into a profile
+  install                       Install all ${PLUGINS.length} plugins into a profile
   update                        Update installed plugins to the latest versions
   doctor                        Check Node, dsh CLI, profile and per-plugin state
 

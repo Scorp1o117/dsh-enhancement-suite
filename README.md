@@ -2,9 +2,9 @@
 
 [![中文文档](https://img.shields.io/badge/%E4%B8%AD%E6%96%87%E6%96%87%E6%A1%A3-blue)](README.zh.md) [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE) [![Node](https://img.shields.io/badge/node-%3E%3D22.18-green)](package.json)
 
-**Vision · Soul / Persona · Long-term Memory · Plugin Marketplace**
+**Vision · Soul / Persona · Long-term Memory · Plugin Marketplace · Reasoning Options**
 
-The official entry point and one-command installer for the four Scorp1o117 plugins that enhance [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (DSH). This suite is a real installer — not a link collection: it drives the official `dsh plugin` CLI, mounts what needs mounting, and checks the result.
+The official entry point and one-command installer for the Scorp1o117 plugins that enhance [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (DSH). This suite is a real installer — not a link collection: it drives the official `dsh plugin` CLI, mounts what needs mounting, and checks the result.
 
 Version 0.1.4 and newer require DSH `0.1.0-rc.7` or newer and are validated
 with `0.1.0-rc.7`, `0.1.0-rc.8`, and `0.1.1-rc.1`. They also report pnpm
@@ -53,6 +53,14 @@ the current releases.
 
 [→ upstream repository](https://github.com/Scorp1o117/dsh-plugin-marketplace)
 
+## 🎚️ dsh-reasoning-options
+
+为所有第三方（pi-ai）模型自动添加推理强度选项（off → max 七档，默认 high）。
+
+[![npm](https://img.shields.io/npm/v/dsh-reasoning-options)](https://www.npmjs.com/package/dsh-reasoning-options) [![license](https://img.shields.io/npm/l/dsh-reasoning-options)](https://github.com/Scorp1o117/dsh-reasoning-options/blob/main/LICENSE)
+
+[→ upstream repository](https://github.com/Scorp1o117/dsh-reasoning-options)
+
 ---
 
 ## Requirements
@@ -84,12 +92,12 @@ dsh-enhance install
 
 ```
 dsh-enhance list                          Show the plugin registry (installed state per profile)
-dsh-enhance install                       Install all four plugins into a profile
+dsh-enhance install                       Install all plugins into a profile
 dsh-enhance update                        Update installed plugins to the latest versions
 dsh-enhance doctor                        Check Node, dsh CLI, profile and per-plugin state
 
   --profile <name>     target profile (default: web)
-  --only <keys>        comma-separated selection: vision,soul,memory,marketplace (or package names)
+  --only <keys>        comma-separated selection: vision,soul,memory,marketplace,reasoning (or package names)
   --dry-run            print what would run without executing anything
 ```
 
@@ -103,8 +111,8 @@ dsh-enhance update --profile headless
 
 ## How it installs
 
-1. Every plugin is installed through the **official CLI**: `dsh plugin --profile <profile> add <package>`. This suite never loads the plugins through its own dependency graph or its own cordis patch — the four upstream packages stay independent in the profile.
-2. All four plugins now declare `dsh.bundle.patch` (as of vision 0.3.9 / soul-md 0.5.4 / tdai-memory 0.2.9 / marketplace 0.2.4), so `dsh plugin add` reconciles each into `dsh.profile.bundles` and its own bundle layer auto-mounts it.
+1. Every plugin is installed through the **official CLI**: `dsh plugin --profile <profile> add <package>`. This suite never loads the plugins through its own dependency graph or its own cordis patch — the upstream packages stay independent in the profile.
+2. All plugins declare `dsh.bundle.patch` (as of vision 0.3.9 / soul-md 0.5.4 / tdai-memory 0.2.9 / marketplace 0.2.4 / reasoning-options 0.1.0), so `dsh plugin add` reconciles each into `dsh.profile.bundles` and its own bundle layer auto-mounts it.
 3. For profiles that mounted a plugin manually before it gained its bundle manifest, the suite **removes the stale manual row** from `cordis.patch.yml` — two mounts of the same entry id would abort boot. (Non-bundle third-party plugins still get the safe idempotent mount logic: empty `[]` patches are replaced correctly, duplicates are skipped, flow-style arrays are refused instead of corrupted.)
 4. Restart `dsh web` and the plugins load.
 
