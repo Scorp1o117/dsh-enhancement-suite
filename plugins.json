@@ -7,7 +7,8 @@
     "dsh-tool-vision": "0.6.1",
     "dsh-soul-md": "0.5.6",
     "dsh-tdai-memory": "0.2.11",
-    "dsh-plugin-marketplace": "0.2.6"
+    "dsh-plugin-marketplace": "0.2.6",
+    "dsh-reasoning-options": "none"
   },
   "plugins": [
     {

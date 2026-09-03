@@ -35,7 +35,8 @@ if (!Array.isArray(manifest.plugins)) {
       if (typeof p[field] !== "string" || p[field].length === 0) fail(`${p.name ?? "?"}: missing required field ${field}`);
     }
     if (!/^https:\/\/github\.com\//.test(p.repo ?? "")) fail(`${p.name ?? "?"}: repo must be an https github.com URL`);
-    if (!/^\d+\.\d+\.\d+$/.test(rc6Pins[p.name] ?? "")) fail(`${p.name ?? "?"}: missing rc6 compatibility pin`);
+    const pin = rc6Pins[p.name];
+    if (pin !== "none" && !/^\d+\.\d+\.\d+$/.test(pin ?? "")) fail(`${p.name ?? "?"}: missing rc6 compatibility pin (semver, or "none" when the plugin requires DSH rc.7+)`);
   }
 }
 

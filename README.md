@@ -14,7 +14,8 @@ DSH `0.1.0-rc.6` users must install the last compatible plugin releases
 directly: `dsh-tool-vision@0.6.1`, `dsh-soul-md@0.5.6`,
 `dsh-tdai-memory@0.2.11`, and `dsh-plugin-marketplace@0.2.6`. Do not use the
 suite's unpinned `install` command on rc.6 because it intentionally resolves
-the current releases.
+the current releases. `dsh-reasoning-options` requires DSH `0.1.0-rc.7` or
+newer (no rc.6-compatible release exists).
 
 > **This repository does not vendor or replace the individual plugins.**
 > **Each plugin remains independently maintained in its own upstream repository.**

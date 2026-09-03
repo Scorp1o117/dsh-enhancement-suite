@@ -12,7 +12,8 @@ Scorp1o117 DSH 插件（增强 [DeepSeek Harness](https://github.com/deepseek-ai
 仍使用 DSH `0.1.0-rc.6` 的用户请直接安装最后兼容的插件版本：
 `dsh-tool-vision@0.6.1`、`dsh-soul-md@0.5.6`、`dsh-tdai-memory@0.2.11`
 和 `dsh-plugin-marketplace@0.2.6`。不要在 rc.6 上使用套件不锁版本的 `install`
-命令，因为它会按设计安装当前最新版。
+命令，因为它会按设计安装当前最新版。`dsh-reasoning-options` 要求 DSH
+`0.1.0-rc.7` 或更高（没有 rc.6 兼容版本）。
 
 > **本仓库不复制、不替代任何独立插件。**
 > **每个插件都在各自的 upstream 仓库独立维护。**
