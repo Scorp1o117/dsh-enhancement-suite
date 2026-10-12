@@ -1,6 +1,6 @@
 {
   "name": "dsh-enhancement-suite",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Install and update six DSH enhancement plugins from Desktop/Web configuration or the CLI, including Motion UI.",
   "type": "module",
   "license": "MIT",
@@ -47,7 +47,7 @@
   },
   "homepage": "https://github.com/Scorp1o117/dsh-enhancement-suite",
   "dependencies": {
-    "dsh-plugin-marketplace": "^0.5.0",
+    "dsh-plugin-marketplace": "^0.5.2",
     "@deepseek-ai/schemastery": "^3.18.4"
   },
   "main": "index.js",

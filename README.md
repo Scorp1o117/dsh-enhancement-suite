@@ -1,13 +1,13 @@
 # DeepSeek Harness Enhancement Suite
 
-Install and update **Vision, Soul / Persona, Memory, Marketplace, Reasoning Options and Motion UI** from a DSH plugin configuration page or the dsh-enhance CLI. Version 0.3.0 requires DSH 0.2.0-rc.2 or later 0.2.x and Node >=22.19.
+Install and update **Vision, Soul / Persona, Memory, Marketplace, Reasoning Options and Motion UI** from a DSH plugin configuration page or the dsh-enhance CLI. Version 0.3.1 requires DSH 0.2.0-rc.2 or later 0.2.x and Node >=22.19.
 
 ## Desktop and Web configuration page
 
 Use the Desktop-provided dsh command (Application → Manage dsh Command):
 
 ```sh
-dsh plugin --profile desktop add dsh-enhancement-suite@0.3.0
+dsh plugin --profile desktop add dsh-enhancement-suite@0.3.1
 ```
 
 Use --profile web for Web. Restart DSH and open **Plugins → Installed → dsh-enhancement-suite**. Choose **Install all**, **Update installed plugins**, or an individual install/update button. Motion UI is included as dsh-motion-ui. The page displays installed versions, operation progress and errors. All operations target the active Host's profile and use its official CLI; no API credentials are needed. Updating installed plugins skips missing plugins; Install all installs or updates all six. Restart DSH afterwards.

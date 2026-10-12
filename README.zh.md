@@ -1,13 +1,13 @@
 # DeepSeek Harness Enhancement Suite
 
-在 DSH 插件配置页或 dsh-enhance 命令行中安装、更新 **视觉、Soul / Persona、长期记忆、插件市场、推理强度、Motion UI** 六个插件。0.3.0 需要 DSH 0.2.0-rc.2 或后续 0.2.x，以及 Node >=22.19。
+在 DSH 插件配置页或 dsh-enhance 命令行中安装、更新 **视觉、Soul / Persona、长期记忆、插件市场、推理强度、Motion UI** 六个插件。0.3.1 需要 DSH 0.2.0-rc.2 或后续 0.2.x，以及 Node >=22.19。
 
 ## Desktop / Web 配置页
 
 使用 Desktop 提供的 dsh 命令（应用 → 管理 dsh 命令）：
 
 ```sh
-dsh plugin --profile desktop add dsh-enhancement-suite@0.3.0
+dsh plugin --profile desktop add dsh-enhancement-suite@0.3.1
 ```
 
 Web 使用 --profile web。重启后打开 **插件 → 已安装 → dsh-enhancement-suite**，可一键安装全部、一键更新已安装插件，或单独安装/更新。Motion UI 对应 dsh-motion-ui。页面展示真实安装版本、进度和错误，不需要 API 密钥。更新已安装插件会跳过未安装项；安装全部则安装或更新全部六项。完成后重启 DSH。
