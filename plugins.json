@@ -1,14 +1,15 @@
 {
   "suite": "dsh-enhancement-suite",
-  "node": ">=22.18",
-  "dsh": ">=0.1.0-rc.7",
+  "node": ">=22.19",
+  "dsh": ">=0.2.0-rc.2 <0.3.0",
   "defaultProfile": "web",
   "rc6Pins": {
     "dsh-tool-vision": "0.6.1",
     "dsh-soul-md": "0.5.6",
     "dsh-tdai-memory": "0.2.11",
     "dsh-plugin-marketplace": "0.2.6",
-    "dsh-reasoning-options": "none"
+    "dsh-reasoning-options": "none",
+    "dsh-motion-ui": "none"
   },
   "plugins": [
     {
@@ -58,8 +59,18 @@
       "emoji": "🎚️",
       "category": "Model",
       "repo": "https://github.com/Scorp1o117/dsh-reasoning-options",
-      "description": "为所有第三方（pi-ai）模型自动添加推理强度选项（off→max 七档，默认 high）。",
-      "descriptionEn": "Auto-adds reasoning-effort levels (off→max, default high) to every pi-ai third-party model."
+      "description": "为第三方模型添加推理档位，支持 Default 不注入推理强度。",
+      "descriptionEn": "Reasoning levels with native Default (no injected effort)."
+    },
+    {
+      "key": "motion",
+      "name": "dsh-motion-ui",
+      "displayName": "dsh-motion-ui",
+      "emoji": "✨",
+      "category": "UI",
+      "repo": "https://github.com/Scorp1o117/dsh-motion-ui",
+      "description": "交互界面、HTML/SVG 动画与本地计算。",
+      "descriptionEn": "Interactive UI, HTML/SVG animation and local calculations."
     }
   ]
 }

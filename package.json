@@ -1,11 +1,11 @@
 {
   "name": "dsh-enhancement-suite",
-  "version": "0.2.0",
-  "description": "Enhancement suite for DeepSeek Harness — the official installer and registry for Scorp1o117's Vision, Soul/Persona, Memory, Marketplace & Reasoning plugins.",
+  "version": "0.3.0",
+  "description": "Install and update six DSH enhancement plugins from Desktop/Web configuration or the CLI, including Motion UI.",
   "type": "module",
   "license": "MIT",
   "engines": {
-    "node": ">=22.18"
+    "node": ">=22.19"
   },
   "bin": {
     "dsh-enhance": "./bin/dsh-enhance.mjs"
@@ -16,11 +16,17 @@
     "README.md",
     "README.zh.md",
     "LICENSE",
-    "docs"
+    "docs",
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale",
+    "VERIFICATION.md"
   ],
   "scripts": {
-    "check": "node --check bin/dsh-enhance.mjs && node bin/validate-manifest.mjs && node bin/dsh-enhance.mjs --help && node bin/dsh-enhance.mjs list",
-    "prepublishOnly": "npm run check"
+    "check": "node --check index.js && node --check client.js && node --check bin/dsh-enhance.mjs && node bin/validate-manifest.mjs && node bin/dsh-enhance.mjs --help && node bin/dsh-enhance.mjs list",
+    "prepublishOnly": "npm run check",
+    "test": "node --test tests/*.test.mjs"
   },
   "keywords": [
     "deepseek-harness",
@@ -40,5 +46,35 @@
     "url": "https://github.com/Scorp1o117/dsh-enhancement-suite/issues"
   },
   "homepage": "https://github.com/Scorp1o117/dsh-enhancement-suite",
-  "dependencies": {}
+  "dependencies": {
+    "dsh-plugin-marketplace": "^0.5.0",
+    "@deepseek-ai/schemastery": "^3.18.4"
+  },
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-settings": ">=0.2.0-rc.2 <0.3.0",
+    "react": "^18.2.0"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web"
+    },
+    "compatibility": {
+      "dsh": ">=0.2.0-rc.2 <0.3.0",
+      "node": ">=22.19",
+      "profiles": [
+        "web",
+        "desktop"
+      ]
+    }
+  }
 }

@@ -1,141 +1,29 @@
 # DeepSeek Harness Enhancement Suite
 
-[![中文文档](https://img.shields.io/badge/%E4%B8%AD%E6%96%87%E6%96%87%E6%A1%A3-blue)](README.zh.md) [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE) [![Node](https://img.shields.io/badge/node-%3E%3D22.18-green)](package.json)
+Install and update **Vision, Soul / Persona, Memory, Marketplace, Reasoning Options and Motion UI** from a DSH plugin configuration page or the dsh-enhance CLI. Version 0.3.0 requires DSH 0.2.0-rc.2 or later 0.2.x and Node >=22.19.
 
-**Vision · Soul / Persona · Long-term Memory · Plugin Marketplace · Reasoning Options**
+## Desktop and Web configuration page
 
-The official entry point and one-command installer for the Scorp1o117 plugins that enhance [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) (DSH). This suite is a real installer — not a link collection: it drives the official `dsh plugin` CLI, mounts what needs mounting, and checks the result.
+Use the Desktop-provided dsh command (Application → Manage dsh Command):
 
-Version 0.1.4 and newer require DSH `0.1.0-rc.7` or newer and are validated
-with `0.1.0-rc.7`, `0.1.0-rc.8`, and `0.1.1-rc.1`. They also report pnpm
-native-build policy failures explicitly.
-
-DSH `0.1.0-rc.6` users must install the last compatible plugin releases
-directly: `dsh-tool-vision@0.6.1`, `dsh-soul-md@0.5.6`,
-`dsh-tdai-memory@0.2.11`, and `dsh-plugin-marketplace@0.2.6`. Do not use the
-suite's unpinned `install` command on rc.6 because it intentionally resolves
-the current releases. `dsh-reasoning-options` requires DSH `0.1.0-rc.7` or
-newer (no rc.6-compatible release exists).
-
-> **This repository does not vendor or replace the individual plugins.**
-> **Each plugin remains independently maintained in its own upstream repository.**
-
----
-
-## 👁️ dsh-tool-vision
-
-给文本模型增加视觉能力和图片桥接。
-
-[![npm](https://img.shields.io/npm/v/dsh-tool-vision)](https://www.npmjs.com/package/dsh-tool-vision) [![license](https://img.shields.io/npm/l/dsh-tool-vision)](https://github.com/Scorp1o117/dsh-tool-vision/blob/main/LICENSE)
-
-[→ upstream repository](https://github.com/Scorp1o117/dsh-tool-vision)
-
-## 🎭 dsh-soul-md
-
-为 Agent 增加 soul.md 人设、会话/工作区 Persona 和可演化人格。
-
-[![npm](https://img.shields.io/npm/v/dsh-soul-md)](https://www.npmjs.com/package/dsh-soul-md) [![license](https://img.shields.io/npm/l/dsh-soul-md)](https://github.com/Scorp1o117/dsh-soul-md/blob/main/LICENSE)
-
-[→ upstream repository](https://github.com/Scorp1o117/dsh-soul-md)
-
-## 🧠 dsh-tdai-memory
-
-完整的长期分层记忆、召回与搜索。
-
-[![npm](https://img.shields.io/npm/v/dsh-tdai-memory)](https://www.npmjs.com/package/dsh-tdai-memory) [![license](https://img.shields.io/npm/l/dsh-tdai-memory)](https://github.com/Scorp1o117/dsh-tdai-memory/blob/main/LICENSE)
-
-[→ upstream repository](https://github.com/Scorp1o117/dsh-tdai-memory)
-
-## 🛒 dsh-plugin-marketplace
-
-直接在 DSH Web UI 中发现和浏览插件。
-
-[![npm](https://img.shields.io/npm/v/dsh-plugin-marketplace)](https://www.npmjs.com/package/dsh-plugin-marketplace) [![license](https://img.shields.io/npm/l/dsh-plugin-marketplace)](https://github.com/Scorp1o117/dsh-plugin-marketplace/blob/main/LICENSE)
-
-[→ upstream repository](https://github.com/Scorp1o117/dsh-plugin-marketplace)
-
-## 🎚️ dsh-reasoning-options
-
-为所有第三方（pi-ai）模型自动添加推理强度选项（off → max 七档，默认 high）。
-
-[![npm](https://img.shields.io/npm/v/dsh-reasoning-options)](https://www.npmjs.com/package/dsh-reasoning-options) [![license](https://img.shields.io/npm/l/dsh-reasoning-options)](https://github.com/Scorp1o117/dsh-reasoning-options/blob/main/LICENSE)
-
-[→ upstream repository](https://github.com/Scorp1o117/dsh-reasoning-options)
-
----
-
-## Requirements
-
-- **Node.js >= 22.18** — the full suite inherits the `dsh-tdai-memory` engine requirement
-- **dsh CLI** on `PATH` — the official DeepSeek Harness CLI (`dsh plugin --profile <p> add <pkg>` is the install mechanism)
-- A target profile (default: `web`)
-
-## Install & usage
-
-From this repository (no install needed):
-
-```bash
-node bin/dsh-enhance.mjs list
-node bin/dsh-enhance.mjs install --dry-run
-node bin/dsh-enhance.mjs install
-node bin/dsh-enhance.mjs doctor
+```sh
+dsh plugin --profile desktop add dsh-enhancement-suite@0.3.0
 ```
 
-As a global command (once published to npm):
+Use --profile web for Web. Restart DSH and open **Plugins → Installed → dsh-enhancement-suite**. Choose **Install all**, **Update installed plugins**, or an individual install/update button. Motion UI is included as dsh-motion-ui. The page displays installed versions, operation progress and errors. All operations target the active Host's profile and use its official CLI; no API credentials are needed. Updating installed plugins skips missing plugins; Install all installs or updates all six. Restart DSH afterwards.
 
-```bash
-npm install -g dsh-enhancement-suite
-dsh-enhance list
-dsh-enhance install
-```
+The suite shares the marketplace's operation engine without mounting a duplicate marketplace plugin. Installing all adds the marketplace as its own independent bundle. Use the marketplace configuration page for uninstall and management of other installed plugins. Built-in DSH bundles are protected.
 
 ## CLI
 
-```
-dsh-enhance list                          Show the plugin registry (installed state per profile)
-dsh-enhance install                       Install all plugins into a profile
-dsh-enhance update                        Update installed plugins to the latest versions
-dsh-enhance doctor                        Check Node, dsh CLI, profile and per-plugin state
-
-  --profile <name>     target profile (default: web)
-  --only <keys>        comma-separated selection: vision,soul,memory,marketplace,reasoning (or package names)
-  --dry-run            print what would run without executing anything
+```sh
+npx dsh-enhancement-suite list --profile desktop
+npx dsh-enhancement-suite install --profile desktop
+npx dsh-enhancement-suite update --profile desktop --only motion,reasoning
 ```
 
-Examples:
+On Desktop, the dsh command on PATH must be installed by Desktop. If another global CLI shadows it on Windows, set DSH_ENHANCE_DESKTOP_EXECUTABLE to the absolute DeepSeek Harness.exe path before running dsh-enhance; this uses Desktop's bundled CLI and pnpm. --dry-run previews operations. --only accepts short keys or package names. Individual plugins remain independently maintained and are installed directly into the profile.
 
-```bash
-dsh-enhance install --dry-run                    # preview everything
-dsh-enhance install --profile web --only vision,soul
-dsh-enhance update --profile headless
-```
+## Validation
 
-## How it installs
-
-1. Every plugin is installed through the **official CLI**: `dsh plugin --profile <profile> add <package>`. This suite never loads the plugins through its own dependency graph or its own cordis patch — the upstream packages stay independent in the profile.
-2. All plugins declare `dsh.bundle.patch` (as of vision 0.3.9 / soul-md 0.5.4 / tdai-memory 0.2.9 / marketplace 0.2.4 / reasoning-options 0.1.0), so `dsh plugin add` reconciles each into `dsh.profile.bundles` and its own bundle layer auto-mounts it.
-3. For profiles that mounted a plugin manually before it gained its bundle manifest, the suite **removes the stale manual row** from `cordis.patch.yml` — two mounts of the same entry id would abort boot. (Non-bundle third-party plugins still get the safe idempotent mount logic: empty `[]` patches are replaced correctly, duplicates are skipped, flow-style arrays are refused instead of corrupted.)
-4. Restart `dsh web` and the plugins load.
-
-Every step reports a clear `✓` / `✗`, failures are never swallowed, and no API key is read, printed, or forwarded.
-
-## Integration / Adoption
-
-The following plugins are adopted and shipped built-in by the **Deepseek Harness EAC** desktop client:
-
-- 👁️ `dsh-tool-vision`
-- 🎭 `dsh-soul-md`
-- 🧠 `dsh-tdai-memory`
-
-[Deepseek-Harness-EAC](https://github.com/zouyuxuan122/Deepseek-Harness-EAC)
-
-> Note: EAC's built-in marketplace implementation is a separate project; it does not use `dsh-plugin-marketplace`.
-
-## Documentation
-
-- [Architecture](docs/architecture.md) — design decisions, manifest schema, safety rules
-- [plugins.json](plugins.json) — the plugin manifest (npm name, repo, category, display name, description)
-
-## License
-
-MIT — see [LICENSE](LICENSE). Each plugin keeps its own MIT license in its upstream repository.
+npm run check validates syntax, the six-plugin registry and CLI help/list. npm test validates the bundle, configuration page and CLI selection.

@@ -36,7 +36,7 @@ const DEFAULT_PROFILE = MANIFEST.defaultProfile ?? "web";
 /** Short keys and full package names are both accepted for --only. */
 const KEY_ALIASES = new Map(PLUGINS.map((p) => [p.key, p.name]));
 const NODE_MIN = MANIFEST.node ?? ">=22.18";
-const DSH_MIN = MANIFEST.dsh ?? ">=0.1.0-rc.7";
+const DSH_MIN = MANIFEST.dsh ?? ">=0.2.0-rc.2 <0.3.0";
 
 const ok = (msg) => console.log(`  ✓ ${msg}`);
 const bad = (msg) => console.log(`  ✗ ${msg}`);
@@ -72,7 +72,13 @@ function installedManifest(pkg, profile) {
 }
 
 /** Locate the dsh CLI on PATH (dsh.cmd / dsh.exe on Windows, dsh elsewhere). */
-function findDsh() {
+function findDsh(profile) {
+  if (profile === "desktop" && process.env.DSH_ENHANCE_DESKTOP_EXECUTABLE) {
+    const executable = process.env.DSH_ENHANCE_DESKTOP_EXECUTABLE;
+    const cli = join(dirname(executable), "resources", "app.asar", "dsh", "node_modules", "@deepseek-ai", "dsh-desktop-host", "lib", "cli.js");
+    if (!existsSync(executable)) throw new CliError(`Desktop executable not found: ${executable}`);
+    return { executable, prefix: ["--expose-internals", cli], env: { ...process.env, ELECTRON_RUN_AS_NODE: "1" } };
+  }
   const override = process.env.DSH_ENHANCE_DSH_BIN;
   if (override) return override;
   const names = process.platform === "win32" ? ["dsh.cmd", "dsh.exe", "dsh"] : ["dsh"];
@@ -98,14 +104,17 @@ function quoteArg(arg) {
  * Node's `args + shell:true` deprecation (DEP0190) is not triggered.
  */
 function run(bin, args, { capture = false, cwd } = {}) {
+  let env = process.env;
+  if (typeof bin === "object") { env = bin.env; args = [...bin.prefix, ...args]; bin = bin.executable; }
   return new Promise((resolve) => {
     const opts = {
       stdio: capture ? ["ignore", "pipe", "pipe"] : "inherit",
       windowsHide: true,
+      env,
       ...(cwd ? { cwd } : {}),
     };
     let child;
-    if (process.platform === "win32") {
+    if (process.platform === "win32" && /\.(cmd|bat)$/i.test(bin)) {
       child = spawn([bin, ...args].map(quoteArg).join(" "), { ...opts, shell: true });
     } else {
       child = spawn(bin, args, opts);
@@ -385,9 +394,9 @@ Examples:
 
 Notes:
   - Install prefers the official CLI: dsh plugin --profile <profile> add <package>
-  - Requires DSH ${DSH_MIN}; rc.6 users must install the pinned legacy releases documented in the README
+  - Requires DSH ${DSH_MIN}; use older suite releases for older DSH versions
   - Requires Node ${NODE_MIN} (dsh-tdai-memory constraint)
-  - This suite never loads plugins through its own dependency graph`);
+  - Plugins are installed directly into the selected profile`);
 }
 
 // ── commands ────────────────────────────────────────────────────────────────
@@ -409,7 +418,7 @@ function cmdList(profile) {
 
 async function cmdInstall(profile, only, dryRun) {
   const plugins = resolveSelection(only);
-  const dsh = findDsh();
+  const dsh = findDsh(profile);
   if (!dsh) {
     bad("dsh CLI not found on PATH — install dsh first (https://github.com/deepseek-ai/deepseek-harness)");
     process.exitCode = 1;
@@ -421,7 +430,7 @@ async function cmdInstall(profile, only, dryRun) {
     info(`${p.emoji} ${p.name}`);
     const latest = await latestVersion(p.name);
     const installed = installedVersion(p.name, profile);
-    const addArgs = ["plugin", "--profile", profile, "add", p.name];
+    const addArgs = ["plugin", "--profile", profile, "add", `${p.name}@latest`];
     if (dryRun) {
       ok(`npm latest: ${latest ?? "unknown (network?)"}; installed: ${installed ?? "not installed"}`);
       if (latest && installed && installed !== latest) {
@@ -480,77 +489,14 @@ async function cmdInstall(profile, only, dryRun) {
     console.log("Fix the reported plugin(s) and re-run dsh-enhance install. No partial state was hidden.");
     process.exitCode = 1;
   } else {
-    console.log("Restart dsh web for the new plugins to load.");
+    console.log("Restart DSH for the new plugins to load.");
   }
 }
 
 async function cmdUpdate(profile, only, dryRun) {
-  const plugins = resolveSelection(only);
-  const dsh = findDsh();
-  if (!dsh) {
-    bad("dsh CLI not found on PATH");
-    process.exitCode = 1;
-    return;
-  }
-  head(`Updating ${plugins.length} plugin(s) in profile "${profile}"`);
-  const failures = [];
-  for (const p of plugins) {
-    if (!installedManifest(p.name, profile)) {
-      info(`${p.emoji} ${p.name}: not installed — run "dsh-enhance install" first`);
-      continue;
-    }
-    const installed = installedVersion(p.name, profile);
-    info(`${p.emoji} ${p.name} (installed ${installed})`);
-    const latest = await latestVersion(p.name);
-    const args = ["plugin", "--profile", profile, "update", p.name];
-    if (dryRun) {
-      ok(`npm latest: ${latest ?? "unknown (network?)"}`);
-      if (latest && installed && installed !== latest) {
-        ok(`would bump range to ^${latest} (pnpm keeps stale lockfile versions otherwise)`);
-        ok(`would ensure minimumReleaseAgeExclude entry for ${p.name}@${latest}`);
-      }
-      ok(`would run: dsh ${args.join(" ")}`);
-      continue;
-    }
-    if (latest && installed && installed !== latest) {
-      if (bumpProfileRange(profile, p.name, latest)) info(`range align: ^${installed} → ^${latest}`);
-      ensureReleaseAgeExclude(profile, p.name, latest);
-    }
-    const result = await run(dsh, args, { capture: true });
-    if (result.code !== 0) {
-      bad(`${p.name} update failed (${result.code}): ${failureSummary(result)}`);
-      failures.push(`${p.name}: dsh plugin update exited ${result.code}`);
-      continue;
-    }
-    let after = installedVersion(p.name, profile);
-    ok(`updated: ${after ?? "latest"}`);
-    if (latest && after !== latest) {
-      const pnpm = findPnpm();
-      if (!pnpm) {
-        bad(`${p.name}: still at ${after ?? "?"}, npm latest ${latest} — install pnpm and re-run`);
-        failures.push(`${p.name}: version mismatch (${after ?? "?"} ≠ ${latest})`);
-        continue;
-      }
-      info(`installed ${after ?? "?"} ≠ latest ${latest} — running pnpm install as fallback`);
-      const pr = await run(pnpm, ["install"], { capture: true, cwd: profileDir(profile) });
-      after = installedVersion(p.name, profile);
-      if (pr.code !== 0 || after !== latest) {
-        bad(`${p.name}: still at ${after ?? "?"}, npm latest ${latest} (pnpm exit ${pr.code}): ${failureSummary(pr)}`);
-        failures.push(`${p.name}: version mismatch (${after ?? "?"} ≠ ${latest})`);
-        continue;
-      }
-      ok(`pnpm install fallback: ${after}`);
-    }
-    const mount = ensureMounted(p.name, profile);
-    if (mount.changed) ok(mount.note);
-  }
-  head("");
-  if (failures.length > 0) {
-    for (const f of failures) console.log(`  ✗ ${f}`);
-    process.exitCode = 1;
-  } else {
-    console.log("Update finished. Restart dsh web to load the new versions.");
-  }
+  const plugins = resolveSelection(only).filter(plugin => installedVersion(plugin.name, profile));
+  if (!plugins.length) { info("No installed suite plugins to update."); return; }
+  return cmdInstall(profile, plugins.map(plugin => plugin.name), dryRun);
 }
 
 function cmdDoctor(profile) {
@@ -562,9 +508,9 @@ function cmdDoctor(profile) {
     bad(`Node ${process.versions.node} — this suite requires ${NODE_MIN} (dsh-tdai-memory constraint)`);
     healthy = false;
   }
-  const dsh = findDsh();
+  const dsh = findDsh(profile);
   if (dsh) {
-    ok(`dsh CLI found: ${dsh}`);
+    ok(`dsh CLI found: ${typeof dsh === "object" ? dsh.executable : dsh}`);
   } else {
     bad("dsh CLI not found on PATH — install DeepSeek Harness first");
     healthy = false;
