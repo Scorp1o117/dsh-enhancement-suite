@@ -1,12 +1,12 @@
 {
   "name": "dsh-enhancement-suite",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Install and update six DSH enhancement plugins from Desktop/Web configuration or the CLI, including Motion UI.",
   "type": "module",
   "license": "MIT",
   "engines": {
     "node": ">=22.19",
-    "dsh": ">=0.2.0-rc.2 <0.3.0 || 0.2.1-rc.1"
+    "dsh": ">=0.2.0-rc.2 <0.3.0 || 0.2.1-rc.1 || 0.2.1-rc.2"
   },
   "bin": {
     "dsh-enhance": "./bin/dsh-enhance.mjs"
@@ -59,7 +59,7 @@
     "./locale/*.json": "./locale/*.json"
   },
   "peerDependencies": {
-    "@deepseek-ai/dsh-settings": ">=0.2.0-rc.2 <0.3.0 || 0.2.1-rc.1",
+    "@deepseek-ai/dsh-settings": ">=0.2.0-rc.2 <0.3.0 || 0.2.1-rc.1 || 0.2.1-rc.2",
     "react": "^18.2.0"
   },
   "dsh": {
@@ -70,14 +70,15 @@
       "platform": "web"
     },
     "compatibility": {
-      "dsh": ">=0.2.0-rc.2 <0.3.0 || 0.2.1-rc.1",
+      "dsh": ">=0.2.0-rc.2 <0.3.0 || 0.2.1-rc.1 || 0.2.1-rc.2",
       "node": ">=22.19",
       "profiles": [
         "web",
         "desktop"
       ],
       "dshReleases": {
-        "0.2.1-rc.1": "compatible"
+        "0.2.1-rc.1": "compatible",
+        "0.2.1-rc.2": "compatible"
       }
     }
   }

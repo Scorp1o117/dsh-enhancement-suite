@@ -20,7 +20,7 @@ const fail = (message) => {
 };
 
 const manifest = JSON.parse(readFileSync(join(ROOT, "plugins.json"), "utf8"));
-if (manifest.dsh !== ">=0.2.0-rc.2 <0.3.0 || 0.2.1-rc.1") fail(`expected dsh requirement >=0.2.0-rc.2 <0.3.0 || 0.2.1-rc.1, got ${manifest.dsh ?? "missing"}`);
+if (manifest.dsh !== ">=0.2.0-rc.2 <0.3.0 || 0.2.1-rc.1 || 0.2.1-rc.2") fail(`expected dsh requirement >=0.2.0-rc.2 <0.3.0 || 0.2.1-rc.1 || 0.2.1-rc.2, got ${manifest.dsh ?? "missing"}`);
 if (!Array.isArray(manifest.plugins)) {
   fail("plugins.json: missing plugins array");
 } else {
