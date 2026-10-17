@@ -1,5 +1,9 @@
 # DeepSeek Harness Enhancement Suite
 
+## DSH 0.2.1-rc.1
+
+Supports DSH 0.2.1-rc.1. Compatibility is declared through `engines.dsh` and matching peer ranges, including this exact prerelease. The existing 0.2.0-rc.2 support is retained.
+
 Install and update **Vision, Soul / Persona, Memory, Marketplace, Reasoning Options and Motion UI** from a DSH plugin configuration page or the dsh-enhance CLI. Version 0.3.1 requires DSH 0.2.0-rc.2 or later 0.2.x and Node >=22.19.
 
 ## Desktop and Web configuration page

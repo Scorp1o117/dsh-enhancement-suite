@@ -1,7 +1,7 @@
 {
   "suite": "dsh-enhancement-suite",
   "node": ">=22.19",
-  "dsh": ">=0.2.0-rc.2 <0.3.0",
+  "dsh": ">=0.2.0-rc.2 <0.3.0 || 0.2.1-rc.1",
   "defaultProfile": "web",
   "rc6Pins": {
     "dsh-tool-vision": "0.6.1",
@@ -59,8 +59,8 @@
       "emoji": "🎚️",
       "category": "Model",
       "repo": "https://github.com/Scorp1o117/dsh-reasoning-options",
-      "description": "为第三方模型添加推理档位，支持 Default 不注入推理强度。",
-      "descriptionEn": "Reasoning levels with native Default (no injected effort)."
+      "description": "OpenCode 会话头与路由 Default 辅助；推理档位优先使用 DSH 原生设置。",
+      "descriptionEn": "OpenCode headers and provider Default helpers; native DSH model reasoning settings take precedence."
     },
     {
       "key": "motion",

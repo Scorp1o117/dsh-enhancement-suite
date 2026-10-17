@@ -1,5 +1,9 @@
 # DeepSeek Harness Enhancement Suite
 
+## DSH 0.2.1-rc.1
+
+支持 DSH 0.2.1-rc.1，通过 `engines.dsh` 和一致的 peer 范围声明兼容，明确包含该预发布版本，并保留已有 0.2.0-rc.2 支持。
+
 在 DSH 插件配置页或 dsh-enhance 命令行中安装、更新 **视觉、Soul / Persona、长期记忆、插件市场、推理强度、Motion UI** 六个插件。0.3.1 需要 DSH 0.2.0-rc.2 或后续 0.2.x，以及 Node >=22.19。
 
 ## Desktop / Web 配置页
