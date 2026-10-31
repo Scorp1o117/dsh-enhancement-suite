@@ -31,3 +31,18 @@
 - engines.dsh and every DSH peer range accept 0.2.0-rc.2, 0.2.1-rc.1, 0.2.1-rc.2 and 0.2.1-rc.3, while unverified alpha releases remain excluded.
 - Source comparison of dsh-v0.2.1-rc.2...dsh-v0.2.1-rc.3 found no change to the tool, system-prompt, settings or pi-ai interfaces used by these plugins. The removed ctx.layout.entryVisibility and agentPresetNavigation APIs were not in use.
 - This verification covers Web. The Desktop application was not exercised. No real-model generation was requested.
+
+## 2026-10-31: DSH 0.2.1-rc.4 / rc.5 (local, unreleased)
+
+- `npm test` passed. The suite test tree still resolves its existing marketplace dependency against DSH rc.3; the real-host checks below use rc.4 and rc.5.
+- Local package tarballs for all seven plugins installed into separate isolated Web profiles built from the official rc.4 and rc.5 templates. Each host started, served the authenticated Web UI, and showed all seven plugin pages as running without browser page exceptions.
+- DSH rc.3→rc.5 source comparison found a changed reasoning Body slot, which these plugins do not use. DSH compatibility and SDK peer ranges accept rc.4 and rc.5 while retaining prior declared versions; 0.2.2-alpha.2 is not claimed.
+- The suite still resolves the published marketplace 0.5.6 as a nested dependency; its management implementation matches this local marketplace source, but its published peer metadata does not include rc.4/rc.5. Publish the updated marketplace first and raise the suite dependency minimum when preparing a release.
+- Native Desktop, external model calls, publication, and deployment were not exercised.
+
+## 2026-10-31: v0.3.5 release candidate
+
+- The suite dependency minimum is updated to marketplace 0.5.7. A clean test tree using the local marketplace 0.5.7 package and DSH settings rc.5 passed `npm test` and `npm run check`.
+- After marketplace 0.5.7 became available on npm, a fresh registry lock and installed dependency tree resolved both marketplace and DSH settings/llm rc.5 without peer conflicts; `npm test` and `npm run check` passed again.
+- The earlier rc.4/rc.5 host checks used the prior suite package; native Desktop was not tested.
+- All seven final versioned package tarballs were then installed together in a fresh rc.5 Web profile. Their configuration pages reported running, the Soul selector switch was hidden and restored, and the browser reported no page exceptions.
