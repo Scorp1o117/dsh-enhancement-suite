@@ -1,12 +1,12 @@
 {
   "name": "dsh-enhancement-suite",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "Install and update six DSH enhancement plugins from Desktop/Web configuration or the CLI, including Motion UI.",
   "type": "module",
   "license": "MIT",
   "engines": {
     "node": ">=22.19",
-    "dsh": ">=0.2.0-rc.2 <0.3.0 || 0.2.1-rc.1 || 0.2.1-rc.2 || 0.2.1-rc.3 || 0.2.1-rc.4 || 0.2.1-rc.5 || 0.2.2-rc.1 || 0.2.2-rc.2"
+    "dsh": ">=0.2.0-rc.2 || >=0.2.1-rc.1 || >=0.2.2-rc.1"
   },
   "bin": {
     "dsh-enhance": "./bin/dsh-enhance.mjs"
@@ -49,7 +49,7 @@
   "homepage": "https://github.com/Scorp1o117/dsh-enhancement-suite",
   "dependencies": {
     "@deepseek-ai/schemastery": "^3.18.4",
-    "dsh-plugin-marketplace": "^0.5.9"
+    "dsh-plugin-marketplace": "^0.5.10"
   },
   "main": "index.js",
   "exports": {
@@ -62,7 +62,7 @@
     "@deepseek-ai/dsh-settings": "0.2.2-rc.2"
   },
   "peerDependencies": {
-    "@deepseek-ai/dsh-settings": ">=0.2.0-rc.2 <0.3.0 || 0.2.1-rc.1 || 0.2.1-rc.2 || 0.2.1-rc.3 || 0.2.1-rc.4 || 0.2.1-rc.5 || 0.2.2-rc.1 || 0.2.2-rc.2",
+    "@deepseek-ai/dsh-settings": ">=0.2.0-rc.2 || >=0.2.1-rc.1 || >=0.2.2-rc.1",
     "react": "^18.2.0"
   },
   "dsh": {
@@ -73,7 +73,7 @@
       "platform": "web"
     },
     "compatibility": {
-      "dsh": ">=0.2.0-rc.2 <0.3.0 || 0.2.1-rc.1 || 0.2.1-rc.2 || 0.2.1-rc.3 || 0.2.1-rc.4 || 0.2.1-rc.5 || 0.2.2-rc.1 || 0.2.2-rc.2",
+      "dsh": ">=0.2.0-rc.2 || >=0.2.1-rc.1 || >=0.2.2-rc.1",
       "node": ">=22.19",
       "profiles": [
         "web",

@@ -36,7 +36,7 @@ const DEFAULT_PROFILE = MANIFEST.defaultProfile ?? "web";
 /** Short keys and full package names are both accepted for --only. */
 const KEY_ALIASES = new Map(PLUGINS.map((p) => [p.key, p.name]));
 const NODE_MIN = MANIFEST.node ?? ">=22.18";
-const DSH_MIN = MANIFEST.dsh ?? ">=0.2.0-rc.2 <0.3.0";
+const DSH_MIN = MANIFEST.dsh ?? PKG.engines.dsh;
 
 const ok = (msg) => console.log(`  ✓ ${msg}`);
 const bad = (msg) => console.log(`  ✗ ${msg}`);

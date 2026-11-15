@@ -19,7 +19,7 @@ The suite is an installer and does not merge these projects into a single plugin
 
 ## Compatibility
 
-- DSH Web and Desktop. The suite declares support for `0.2.0-rc.2`, `0.2.1-rc.1` / `rc.2` / `rc.3` / `rc.4` / `rc.5`, and versions matching `>=0.2.0-rc.2 <0.3.0`. See [package.json](package.json) for the complete prerelease range.
+- DSH Web / Desktop accepts host versions from `0.2.0-rc.2` onward at startup, including future prereleases. See [package.json](package.json) for the compatibility declaration.
 - The suite requires Node.js `>=22.19`. Individual plugins can have different requirements; in particular, Motion UI explicitly lists its supported DSH versions.
 
 ## Installation and use
